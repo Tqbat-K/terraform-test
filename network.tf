@@ -27,7 +27,7 @@ resource "aws_route_table" "keis_rt" {
 		Name = "keis_rt"
 	}
 }
-
+# localルートテーブルで、VPCで設定したCIDRの範囲内の宛先はVPC内で宛先ホストを探す
 resource "aws_route_table_association" "keis_routing1" {
 	route_table_id = aws_route_table.keis_rt.id
 	subnet_id = aws_subnet.keis_subnet_1.id
