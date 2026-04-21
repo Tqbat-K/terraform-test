@@ -43,7 +43,7 @@ resource "aws_subnet" "keis_subnet_1" {
 resource "aws_subnet" "keis_subnet_2" {
   vpc_id                  = aws_vpc.keis_vpc.id
   cidr_block              = "10.0.2.0/24"
-  availability_zone       = "ap-northeast-1b"
+  availability_zone       = "ap-northeast-1c"
   map_public_ip_on_launch = true
 
   tags = {
