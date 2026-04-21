@@ -1,54 +1,47 @@
 resource "aws_security_group" "keis_alb" {
-  vpc_id = aws_vpc.keis_vpc.id
-}
+  name        = "keis-alb-sg"
+  description = "Allow HTTP from internet"
+  vpc_id      = aws_vpc.keis_vpc.id
 
-resource "aws_vpc_security_group_ingress_rule" "keis_alb_ingress_http" {
-	aws_security_group.keis_alb.id
-	cidr_ipv4 = "0.0.0.0/0"
-	ip_protocol = "tcp"
-	from_port = 80
-	to_port = 80
-}
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "aws_vpc_security_group_ingress_rule" "keis_alb_ingress_https" {
-        aws_security_group.keis_alb.id
-        cidr_ipv4 = "0.0.0.0/0"
-        ip_protocol = "tcp"
-        from_port = 443
-        to_port = 443
-}
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "aws_vpc_security_group_egress_rule" "keis_alb_egress" {
-	security_group_id = aws_security_group.keis_alb.id
-	cidr_ipv4         = "0.0.0.0/0"
-	ip_protocol       = "-1" # all ports
+  tags = {
+    Name = "keis_alb_sg"
+  }
 }
-# ロードバランサ用
-# ↓EC2用
 
 resource "aws_security_group" "keis_ec2" {
-  vpc_id = aws_vpc.keis_vpc.id
-}
+  name        = "keis-ec2-sg"
+  description = "Allow HTTP only from ALB"
+  vpc_id      = aws_vpc.keis_vpc.id
 
-resource "aws_security_group_ingress_rule" "keis_ec2_http" {
-	security_group_id = aws_security_group.keis_ec2.id
-	ip_protocol = "tcp"
-	from_port = 80
-	to_port = 80
-	referenced_security_group_id = aws_security_group.keis_alb.id
-}
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.keis_alb.id]
+  }
 
-resource "aws_security_group_ingress_rule" "keis_ec2_https" {
-        security_group_id = aws_security_group.keis_ec2.id
-        ip_protocol = "tcp"
-        from_port = 443
-        to_port = 443
-        referenced_security_group_id = aws_security_group.keis_alb.id
-}
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-resource "aws_vpc_security_group_egress_rule" "keis_ec2_egress" {
- 	 security_group_id = aws_security_group.keis_ec2.id
-	  cidr_ipv4         = "0.0.0.0/0"
- 	 ip_protocol       = "-1" # all ports
+  tags = {
+    Name = "keis_ec2_sg"
+  }
 }
-
